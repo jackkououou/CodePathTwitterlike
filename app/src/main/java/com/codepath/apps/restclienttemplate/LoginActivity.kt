@@ -1,14 +1,17 @@
 package com.codepath.apps.restclienttemplate
 
+import android.content.Intent
+import android.nfc.Tag
 import android.os.AsyncTask
 import android.os.Bundle
+import android.util.Log
 import android.view.Menu
 import android.view.View
 import com.codepath.apps.restclienttemplate.models.SampleModel
 import com.codepath.apps.restclienttemplate.models.SampleModelDao
 import com.codepath.oauth.OAuthLoginActionBarActivity
 
-class LoginActivity : OAuthLoginActionBarActivity<RestClient>() {
+class LoginActivity : OAuthLoginActionBarActivity<TwitterClient>() {
 
     var sampleModelDao: SampleModelDao? = null
 
@@ -17,7 +20,7 @@ class LoginActivity : OAuthLoginActionBarActivity<RestClient>() {
         setContentView(R.layout.activity_login)
         val sampleModel = SampleModel()
         sampleModel.name = "CodePath"
-        sampleModelDao = (applicationContext as RestApplication).myDatabase?.sampleModelDao()
+        sampleModelDao = (applicationContext as TwitterApplication).myDatabase?.sampleModelDao()
         AsyncTask.execute { sampleModelDao?.insertModel(sampleModel) }
     }
 
@@ -31,13 +34,16 @@ class LoginActivity : OAuthLoginActionBarActivity<RestClient>() {
     // OAuth authenticated successfully, launch primary authenticated activity
     // i.e Display application "homepage"
     override fun onLoginSuccess() {
-        // val i = Intent(this, PhotosActivity::class.java)
-        // startActivity(i)
+        Log.i(TAG, "Logged in successfully")
+        val i = Intent(this, TimelineActivity::class.java)
+        startActivity(i)
     }
 
     // OAuth authentication flow failed, handle the error
     // i.e Display an error dialog or toast
     override fun onLoginFailure(e: Exception) {
+        Log.i(TAG, "Login failed")
+
         e.printStackTrace()
     }
 
@@ -46,5 +52,9 @@ class LoginActivity : OAuthLoginActionBarActivity<RestClient>() {
     // This should be tied to a button used to login
     fun loginToRest(view: View?) {
         client.connect()
+    }
+
+    companion object {
+        const val TAG = "LoginActivity"
     }
 }
