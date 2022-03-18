@@ -1,8 +1,16 @@
 package com.codepath.apps.restclienttemplate
 
+import android.app.Activity
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
+import android.widget.Toast
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -20,6 +28,23 @@ class TimelineActivity : AppCompatActivity() {
     lateinit var adapter: TweetsAdapter
 
     lateinit var swipeContainer: SwipeRefreshLayout
+
+    //MY GOD was this a pain to figure out. read through the docs and had trouble but
+    //I searched the debug message on stackoverflow and found an answer that led me to this result
+    //https://stackoverflow.com/questions/64476827/how-to-resolve-the-error-lifecycleowners-must-call-register-before-they-are-sta
+
+    private val startComposeForResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()
+    ) { result: ActivityResult ->
+
+        if (result.resultCode == Activity.RESULT_OK) {
+            val data = result.data
+
+            if (data != null) {
+                tweets.add(0, data.getParcelableExtra<Tweet>("tweet")!!)
+                adapter.notifyItemInserted(0)
+            }
+        }
+    }
 
     val tweets = ArrayList<Tweet>()
 
@@ -47,7 +72,25 @@ class TimelineActivity : AppCompatActivity() {
         rvTweets.layoutManager = LinearLayoutManager(this)
         rvTweets.adapter = adapter
 
+
+
         populateHomeTimeline()
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_main, menu)
+        return true
+    }
+
+    //Menu item click handler
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+
+        if (item.itemId == R.id.compose) {
+            // Nav to compose screen
+            val intent = Intent(this, ComposeActivity::class.java)
+            startComposeForResult.launch(intent)
+        }
+        return super.onOptionsItemSelected(item)
     }
 
     fun populateHomeTimeline() {
@@ -83,5 +126,6 @@ class TimelineActivity : AppCompatActivity() {
     }
     companion object {
         const val TAG = "TimelineActivity"
+        val REQUEST_CODE = 20
     }
 }

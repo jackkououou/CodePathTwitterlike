@@ -21,11 +21,11 @@ import com.github.scribejava.apis.TwitterApi
 class TwitterClient(context: Context) : OAuthBaseClient(
     context, REST_API_INSTANCE, REST_URL, REST_CONSUMER_KEY, REST_CONSUMER_SECRET,
     null, String.format(
-        REST_CALLBACK_URL_TEMPLATE,
-        context.getString(R.string.intent_host),
-        context.getString(R.string.intent_scheme),
-        context.packageName,
-        FALLBACK_URL
+            REST_CALLBACK_URL_TEMPLATE,
+            context.getString(R.string.intent_host),
+            context.getString(R.string.intent_scheme),
+            context.packageName,
+            FALLBACK_URL
     )
 ) {
 
@@ -60,6 +60,18 @@ class TwitterClient(context: Context) : OAuthBaseClient(
 
 
         client.get(apiUrl, params, handler)
+    }
+
+    fun publishTweet(tweetContent: String, handler: JsonHttpResponseHandler) {
+        val apiUrl =
+            getApiUrl("statuses/update.json")
+
+        // Can specify query string params directly or through RequestParams.
+        val params = RequestParams()
+        params["status"] = tweetContent
+
+
+        client.post(apiUrl, params, "", handler)
     }
 
     /* 1. Define the endpoint URL with getApiUrl and pass a relative path to the endpoint
