@@ -3,9 +3,12 @@ package com.codepath.apps.restclienttemplate
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
 import com.codepath.apps.restclienttemplate.models.Tweet
 import com.codepath.asynchttpclient.callback.JsonHttpResponseHandler
@@ -14,10 +17,10 @@ import okhttp3.Headers
 
 class ComposeActivity : AppCompatActivity() {
 
-    lateinit var etCompose: EditText
+    private lateinit var etCompose: EditText
     lateinit var buttonTweet: Button
-
-    lateinit var client: TwitterClient
+    private lateinit var tvCharCount: TextView
+    private lateinit var client: TwitterClient
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,8 +28,30 @@ class ComposeActivity : AppCompatActivity() {
 
         etCompose = findViewById(R.id.etCompose)
         buttonTweet = findViewById(R.id.buttonTweet)
-
+        tvCharCount = findViewById(R.id.tvCharCount)
         client = TwitterApplication.getRestClient(this)
+
+        etCompose.addTextChangedListener(object: TextWatcher {
+
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
+            override fun afterTextChanged(p0: Editable?) {}
+
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                var tweetCharRemaining = 280 - etCompose.text.toString().length
+
+                when {
+                    tweetCharRemaining >= 0 -> {
+                        "$tweetCharRemaining / 280".also { tvCharCount.text = it }
+                    }
+                    else -> {
+                        "Tweet is too long.".also { tvCharCount.text = it }
+                    }
+                }
+
+            }
+
+
+        })
 
         buttonTweet.setOnClickListener {
 
